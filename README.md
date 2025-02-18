@@ -13,3 +13,7 @@
 - [Nougat: Neural Optical Understanding for Academic Documents](https://github.com/facebookresearch/nougat?tab=readme-ov-file)
 - [PdfPlumber](https://github.com/jsvine/pdfplumber) Plumb a PDF for detailed information about each char, rectangle, line, et cetera — and easily extract text and tables.
 - [OCRmyPDF](https://github.com/ocrmypdf/OCRmyPDF) adds an OCR text layer to scanned PDF files, allowing them to be searched
+
+- [PDF Extract Kit](https://github.com/opendatalab/PDF-Extract-Kit?tab=readme-ov-file)
+- [DocLayout-YOLO](https://github.com/opendatalab/DocLayout-YOLO?tab=readme-ov-file)
+- [Pix2Text](https://github.com/breezedeus/Pix2Text/tree/main)

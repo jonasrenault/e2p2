@@ -25,6 +25,10 @@ notebooks = [
     "jupyterlab>=4.3.5",
 ]
 
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [tool.black]
 line_length = 90
 target_version = ['py312']

@@ -33,13 +33,13 @@ jobs:
       #   run: poetry install --no-interaction --no-root
 
       - name: Test with pytest
-        run: uv run --extra dev pytest
+        run: uv run --group dev pytest
 
       - name: Run black
-        run: uv run --extra dev black --check --config ./pyproject.toml .
+        run: uv run --group dev black --check --config ./pyproject.toml .
 
       - name: Run mypy
-        run: uv run --extra dev mypy --config-file=pyproject.toml
+        run: uv run --group dev mypy --config-file=pyproject.toml
 
       - name: Run ruff
-        run: uv run --extra dev ruff check
+        run: uv run --group dev ruff check

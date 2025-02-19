@@ -49,7 +49,7 @@ def layout_pdf(
                 layout_file_name = (
                     f"{pdf.page_file_stem(page_info.page_number)}_layout.png"
                 )
-                cv2.imwrite(save_dir / layout_file_name, vis_result)
+                cv2.imwrite(str(save_dir / layout_file_name), vis_result)
 
 
 @app.command()

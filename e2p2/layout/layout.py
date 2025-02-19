@@ -74,7 +74,7 @@ def visualize_bbox(
     image: Image.Image,
     detections: list[LayoutDetection],
     alpha: float = 0.3,
-) -> npt.NDArray[np.uint8]:
+) -> npt.NDArray:
     """
     Visualize layout detection results on an image.
 

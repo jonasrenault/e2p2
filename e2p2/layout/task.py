@@ -19,6 +19,7 @@ def layout_pdf(
     img_size: int = 1280,
     conf_thres: float = 0.25,
     iou_thres: float = 0.45,
+    task_name: str = "layout",
 ):
     """
     Run layout detection on given pdf document.
@@ -30,8 +31,9 @@ def layout_pdf(
         save_dir (Path | None, optional): output directory where results are saved.
             Defaults to None.
         img_size (int, optional): Prediction image size. Defaults to 1280.
-        conf_thres (float, optional): confidence threshold. Defaults to 0.25.
-        iou_thres (float, optional): NMS IoU threshold. Defaults to 0.45.
+        conf (float, optional): Confidence threshold. Defaults to 0.25.
+        iou (float, optional): NMS IoU threshold. Defaults to 0.45.
+        task_name (str, optional): Detection task name. Defaults to "layout".
     """
     page_infos: list[PageInfo] = []
     for page_number, image in pdf:
@@ -39,25 +41,24 @@ def layout_pdf(
         layout_detections = layout_model.predict(
             image, img_size=img_size, conf_thres=conf_thres, iou_thres=iou_thres
         )
+        pdf.get_page_info(page_number).layout_detections.extend(layout_detections)
         page_infos.append(
             PageInfo(
                 page_number=page_number,
-                height=img_H,
                 width=img_W,
+                height=img_H,
                 layout_detections=layout_detections,
             )
         )
-    pdf.page_infos = page_infos
 
     if visualize and save_dir is not None:
         for page_info in page_infos:
             image = pdf.get_image(page_info.page_number)
-            if page_info.layout_detections is not None:
-                vis_result = visualize_bbox(image, page_info.layout_detections)
-                layout_file_name = (
-                    f"{pdf.page_file_stem(page_info.page_number)}_layout.png"
-                )
-                cv2.imwrite(str(save_dir / layout_file_name), vis_result)
+            vis_result = visualize_bbox(image, page_info.layout_detections)
+            layout_file_name = (
+                f"{pdf.page_file_stem(page_info.page_number)}_{task_name}.png"
+            )
+            cv2.imwrite(str(save_dir / layout_file_name), vis_result)
 
 
 @app.command()
@@ -87,8 +88,8 @@ def layout(
         list[int] | None, typer.Option(help="list of pages to process.")
     ] = None,
     img_size: Annotated[int, typer.Option(help="prediction image size")] = 1280,
-    conf_thres: Annotated[float, typer.Option(help="prediction image size")] = 0.25,
-    iou_thres: Annotated[float, typer.Option(help="prediction image size")] = 0.45,
+    conf: Annotated[float, typer.Option(help="prediction image size")] = 0.25,
+    iou: Annotated[float, typer.Option(help="prediction image size")] = 0.45,
     device: Annotated[str, typer.Option(help="device to use for predictions")] = "cpu",
 ):
     """
@@ -102,8 +103,8 @@ def layout(
         dpi (int, optional): DPI for image rasterization. Defaults to 96.
         pages (list[int] | None, optional): list of pages to process. Defaults to None.
         img_size (int, optional): Prediction image size. Defaults to 1280.
-        conf_thres (float, optional): Confidence threshold. Defaults to 0.25.
-        iou_thres (float, optional): NMS IoU threshold. Defaults to 0.45.
+        conf (float, optional): Confidence threshold. Defaults to 0.25.
+        iou (float, optional): NMS IoU threshold. Defaults to 0.45.
         device (str, optional): Device to use for predictions. Defaults to "cpu".
     """
     # load pdf
@@ -113,4 +114,4 @@ def layout(
     model = LayoutDetectionYOLO(device=device)
 
     # layout pdf
-    layout_pdf(pdf, model, visualize, save_dir, img_size, conf_thres, iou_thres)
+    layout_pdf(pdf, model, visualize, save_dir, img_size, conf, iou)

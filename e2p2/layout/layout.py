@@ -9,8 +9,7 @@ from PIL import Image
 
 
 class LayoutElement(Enum):
-    ABANDONED = -2
-    IGNORED = -1
+    ABANDONED = -1
     UNKNOWN = 0
     TEXT = 1
     TITLE = 2
@@ -20,7 +19,8 @@ class LayoutElement(Enum):
     TABLE_CAPTION = 6
     TABLE_FOOTNOTE = 7
     FORMULA = 8
-    FORMULA_CAPTION = 9
+    FORMULA_INLINE = 9
+    FORMULA_CAPTION = 10
 
     def __repr__(self) -> str:
         return self.name
@@ -31,7 +31,6 @@ class LayoutElement(Enum):
 
 LAYOUT_ELEMENT_TEXT_COLOR = {
     LayoutElement.ABANDONED: ("abandon", (141, 211, 199)),
-    LayoutElement.IGNORED: ("ignored", (255, 255, 179)),
     LayoutElement.UNKNOWN: ("unknown", (190, 186, 218)),
     LayoutElement.TEXT: ("text", (251, 128, 114)),
     LayoutElement.TITLE: ("title", (128, 177, 211)),
@@ -41,6 +40,7 @@ LAYOUT_ELEMENT_TEXT_COLOR = {
     LayoutElement.TABLE_CAPTION: ("table caption", (217, 217, 217)),
     LayoutElement.TABLE_FOOTNOTE: ("table footnote", (188, 128, 189)),
     LayoutElement.FORMULA: ("formula", (204, 235, 197)),
+    LayoutElement.FORMULA_INLINE: ("formula inline", (255, 255, 179)),
     LayoutElement.FORMULA_CAPTION: ("formula caption", (255, 237, 111)),
 }
 

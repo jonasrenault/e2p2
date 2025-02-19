@@ -34,6 +34,7 @@ class LayoutDetectionYOLO(LayoutDetectionModel):
             device (str | None, optional): device to run predictions on.
                 Defaults to "cpu".
         """
+        # Mapping from class IDs to LayoutElement
         self.class_mapping = {
             0: LayoutElement.TITLE,
             1: LayoutElement.TEXT,
@@ -47,20 +48,6 @@ class LayoutDetectionYOLO(LayoutDetectionModel):
             9: LayoutElement.FORMULA_CAPTION,
         }
 
-        # Mapping from class IDs to class names
-        self.id_to_names = {
-            0: "title",
-            1: "plain text",
-            2: "abandon",
-            3: "figure",
-            4: "figure_caption",
-            5: "table",
-            6: "table_caption",
-            7: "table_footnote",
-            8: "isolate_formula",
-            9: "formula_caption",
-        }
-
         model_dir = Path(snapshot_download(model_repo, local_dir=model_dir))
         self.model = YOLOv10(model_dir / model_name)
         self.device = device
@@ -72,8 +59,18 @@ class LayoutDetectionYOLO(LayoutDetectionModel):
         conf_thres: float = 0.25,
         iou_thres: float = 0.45,
     ) -> list[LayoutDetection]:
-        img_width, img_height = image.size
+        """
+        Run LayoutDetection on given image.
 
+        Args:
+            image (Image.Image): image.
+            img_size (int, optional): Prediction image size. Defaults to 1280.
+            conf_thres (float, optional): Confidence threshold. Defaults to 0.25.
+            iou_thres (float, optional): NMS IoU threshold. Defaults to 0.45.
+
+        Returns:
+            list[LayoutDetection]: list of LayoutDetections.
+        """
         result = self.model.predict(
             image,
             imgsz=img_size,

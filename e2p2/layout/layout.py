@@ -66,7 +66,7 @@ class LayoutDetectionModel(ABC):
     """
 
     @abstractmethod
-    def predict(self, image: Image.Image) -> list[LayoutDetection]:
+    def predict(self, image: Image.Image, *args, **kwargs) -> list[LayoutDetection]:
         pass
 
 

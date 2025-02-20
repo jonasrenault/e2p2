@@ -78,7 +78,7 @@ class FormulaDetectionYOLO(LayoutDetectionModel):
             layout_result = LayoutDetection(
                 bbox=cast(tuple[int, int, int, int], tuple(int(p.item()) for p in xyxy)),
                 score=round(float(conf.item()), 2),
-                label=self.class_mapping[int(cla.item())],
+                category=self.class_mapping[int(cla.item())],
             )
             layout_results.append(layout_result)
 

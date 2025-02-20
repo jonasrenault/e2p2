@@ -46,11 +46,18 @@ LAYOUT_ELEMENT_TEXT_COLOR = {
 
 
 @dataclass
+class ContentRecognition:
+    text: str
+    score: float
+
+
+@dataclass
 class LayoutDetection:
     bbox: tuple[int, int, int, int]  # xmin, ymin, xmax, ymax
     score: float
-    label: LayoutElement
+    category: LayoutElement
     column: int = 0
+    content: ContentRecognition | None = None
 
     @property
     def polygon(
@@ -95,7 +102,7 @@ def visualize_bbox(
 
     for detection in detections:
         x_min, y_min, x_max, y_max = detection.bbox
-        class_name, color = LAYOUT_ELEMENT_TEXT_COLOR[detection.label]
+        class_name, color = LAYOUT_ELEMENT_TEXT_COLOR[detection.category]
         text = class_name + f":{detection.score:.3f}"
 
         cv2.rectangle(overlay, (x_min, y_min), (x_max, y_max), color, -1)

@@ -4,9 +4,10 @@ from typing import Annotated
 import cv2
 import typer
 
-from e2p2.layout.layout import LayoutDetectionModel, visualize_bbox
+from e2p2.layout.layout import LayoutDetectionModel
 from e2p2.layout.yolo import LayoutDetectionYOLO
 from e2p2.pdf.pdf import PageInfo, PdfDoc
+from e2p2.utils.visualize import visualize_bbox
 
 app = typer.Typer()
 

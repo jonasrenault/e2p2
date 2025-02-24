@@ -5,7 +5,8 @@ from huggingface_hub import hf_hub_download
 from PIL import Image
 from ultralytics import YOLO
 
-from e2p2.layout.layout import LayoutDetection, LayoutDetectionModel, LayoutElement
+from e2p2.layout.layout import LayoutDetectionModel
+from e2p2.pdf.pdf import LayoutDetection, LayoutElement
 
 
 class FormulaDetectionYOLO(LayoutDetectionModel):

@@ -1,11 +1,55 @@
 from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
 from typing import Iterable, Iterator
 
+import numpy as np
 from PIL import Image
 
-from e2p2.layout.layout import LayoutDetection
 from e2p2.pdf.rasterize import rasterize_pdf
+
+
+class LayoutElement(Enum):
+    ABANDONED = -1
+    UNKNOWN = 0
+    TEXT = 1
+    TITLE = 2
+    FIGURE = 3
+    FIGURE_CAPTION = 4
+    TABLE = 5
+    TABLE_CAPTION = 6
+    TABLE_FOOTNOTE = 7
+    FORMULA = 8
+    FORMULA_INLINE = 9
+    FORMULA_CAPTION = 10
+
+    def __repr__(self) -> str:
+        return self.name
+
+    def __str__(self) -> str:
+        return self.name
+
+
+@dataclass
+class ContentRecognition:
+    text: str
+    score: float
+
+
+@dataclass
+class LayoutDetection:
+    bbox: tuple[int, int, int, int]  # xmin, ymin, xmax, ymax
+    score: float
+    category: LayoutElement
+    column: int = 0
+    content: ContentRecognition | None = None
+
+    @property
+    def polygon(
+        self,
+    ):
+        xmin, ymin, xmax, ymax = self.bbox
+        return np.array([[xmin, ymin], [xmax, ymin], [xmax, ymax], [xmin, ymax]])
 
 
 @dataclass

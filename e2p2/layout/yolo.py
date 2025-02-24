@@ -8,7 +8,8 @@ from doclayout_yolo import YOLOv10
 from huggingface_hub import snapshot_download
 from PIL import Image
 
-from e2p2.layout.layout import LayoutDetection, LayoutDetectionModel, LayoutElement
+from e2p2.layout.layout import LayoutDetectionModel
+from e2p2.pdf.pdf import LayoutDetection, LayoutElement
 
 
 class LayoutDetectionYOLO(LayoutDetectionModel):

@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from PIL import Image
 
-from e2p2.layout.layout import LayoutDetection
+from e2p2.pdf.pdf import LayoutDetection
 
 
 class OCRModel(ABC):

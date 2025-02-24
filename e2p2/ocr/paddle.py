@@ -6,8 +6,8 @@ import numpy.typing as npt
 from paddleocr import PaddleOCR
 from PIL import Image
 
-from e2p2.layout.layout import ContentRecognition, LayoutDetection, LayoutElement
 from e2p2.ocr.ocr import OCRModel
+from e2p2.pdf.pdf import ContentRecognition, LayoutDetection, LayoutElement
 from e2p2.utils.image import alpha_to_color, binarize_img
 
 type BBox = tuple[float, float, float, float]

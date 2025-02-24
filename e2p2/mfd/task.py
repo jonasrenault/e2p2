@@ -3,8 +3,8 @@ from typing import Annotated
 
 import typer
 
-from e2p2.formula_detection.yolo import FormulaDetectionYOLO
 from e2p2.layout.task import layout_pdf
+from e2p2.mfd.yolo import FormulaDetectionYOLO
 from e2p2.pdf.pdf import PdfDoc
 
 app = typer.Typer()

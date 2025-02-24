@@ -9,7 +9,7 @@ from PIL import Image
 from unimernet.common.config import Config
 from unimernet.processors import load_processor
 
-from e2p2.formula_recognition.mfr import FormulaRecognitionModel, latex_rm_whitespace
+from e2p2.mfr.mfr import FormulaRecognitionModel, latex_rm_whitespace
 
 
 class FormulaRecognitionUniMERNet(FormulaRecognitionModel):

@@ -3,11 +3,11 @@ from typing import Annotated
 
 import typer
 
-from e2p2.formula_detection.yolo import FormulaDetectionYOLO
-from e2p2.formula_recognition.mfr import FormulaRecognitionModel
-from e2p2.formula_recognition.unimernet import FormulaRecognitionUniMERNet
 from e2p2.layout.layout import ContentRecognition, LayoutElement
 from e2p2.layout.task import layout_pdf
+from e2p2.mfd.yolo import FormulaDetectionYOLO
+from e2p2.mfr.mfr import FormulaRecognitionModel
+from e2p2.mfr.unimernet import FormulaRecognitionUniMERNet
 from e2p2.pdf.pdf import PdfDoc
 
 app = typer.Typer()

@@ -7,7 +7,7 @@ from e2p2.layout.task import layout_pdf
 from e2p2.mfd.yolo import FormulaDetectionYOLO
 from e2p2.mfr.mfr import FormulaRecognitionModel
 from e2p2.mfr.unimernet import FormulaRecognitionUniMERNet
-from e2p2.pdf.pdf import ContentRecognition, LayoutElement, PdfDoc
+from e2p2.pdf.pdf import ContentRecognition, PdfDoc, filter_formulas
 
 app = typer.Typer()
 
@@ -19,16 +19,12 @@ def mfr_pdf(
     save_dir: Path | None = None,
 ):
     for page_number, image in pdf:
-        for idx, layout_detection in enumerate(
+        for layout_detection in filter_formulas(
             pdf.get_page_info(page_number).layout_detections
         ):
-            if layout_detection.category in (
-                LayoutElement.FORMULA,
-                LayoutElement.FORMULA_INLINE,
-            ):
-                formula_img = image.crop(layout_detection.bbox)
-                latex = mfr_model.predict(formula_img)
-                layout_detection.content = ContentRecognition(latex, 0.0)
+            formula_img = image.crop(layout_detection.bbox)
+            latex = mfr_model.predict(formula_img)
+            layout_detection.content = ContentRecognition(latex, 0.0)
 
 
 @app.command()

@@ -38,7 +38,7 @@ class LayoutDetectionYOLO(LayoutDetectionModel):
         # Mapping from class IDs to LayoutElement
         self.class_mapping = {
             0: LayoutElement.TITLE,
-            1: LayoutElement.TEXT,
+            1: LayoutElement.PLAIN_TEXT,
             2: LayoutElement.ABANDONED,
             3: LayoutElement.FIGURE,
             4: LayoutElement.FIGURE_CAPTION,

@@ -17,6 +17,16 @@ type Interval = tuple[float, float]
 def get_rotate_crop_image(
     img: npt.NDArray, points: npt.NDArray[np.float32]
 ) -> npt.NDArray:
+    """
+    Crop an image to the given polygon, eventually rotating it as well.
+
+    Args:
+        img (npt.NDArray): the image.
+        points (npt.NDArray[np.float32]): the croping area.
+
+    Returns:
+        npt.NDArray: the croped image.
+    """
     assert len(points) == 4, "shape of points must be 4*2"
     img_crop_width = int(
         max(np.linalg.norm(points[0] - points[1]), np.linalg.norm(points[2] - points[3]))
@@ -46,24 +56,24 @@ def get_rotate_crop_image(
     return dst_img
 
 
-def get_minarea_rect_crop(img: npt.NDArray, points: npt.NDArray[np.float32]):
+def get_minarea_rect_crop(
+    img: npt.NDArray, points: npt.NDArray[np.float32]
+) -> npt.NDArray:
+    """
+    Crop an image to the minimum area rectangle covering the polygon points.
+
+    Args:
+        img (npt.NDArray): the image.
+        points (npt.NDArray[np.float32]): the croping points.
+
+    Returns:
+        npt.NDArray: the croped image.
+    """
     bounding_box = cv2.minAreaRect(np.array(points).astype(np.int32))
     points = sorted(list(cv2.boxPoints(bounding_box)), key=lambda x: x[0])
 
-    index_a, index_b, index_c, index_d = 0, 1, 2, 3
-    if points[1][1] > points[0][1]:
-        index_a = 0
-        index_d = 1
-    else:
-        index_a = 1
-        index_d = 0
-    if points[3][1] > points[2][1]:
-        index_b = 2
-        index_c = 3
-    else:
-        index_b = 3
-        index_c = 2
-
+    index_a, index_d = (0, 1) if points[1][1] > points[0][1] else (1, 0)
+    index_b, index_c = (2, 3) if points[3][1] > points[2][1] else (3, 2)
     box = [points[index_a], points[index_b], points[index_c], points[index_d]]
     crop_img = get_rotate_crop_image(img, np.array(box))
     return crop_img
@@ -227,7 +237,8 @@ def remove_intervals(original: Interval, masks: list[Interval]) -> list[Interval
 
 
 def update_det_boxes(
-    dt_boxes: list[npt.NDArray[np.float32]], mfd_detections: list[LayoutDetection]
+    dt_boxes: list[npt.NDArray[np.float32]],
+    mfd_detections: list[tuple[int, int, int, int]],
 ) -> list[npt.NDArray[np.float32]]:
     """
     Given a list of detected text boxes, remove the spans corresponding to formulas
@@ -235,8 +246,8 @@ def update_det_boxes(
 
     Args:
         dt_boxes (list[npt.NDArray[np.float32]]): list of detected text bounding boxes
-        mfd_detections (list[LayoutDetection]): list of layout detecting containing
-            bounding boxes for formulas which already have been ocr'd.
+        mfd_detections (list[tuple[int, int, int, int]]): list of layout detecting
+            containing bounding boxes for formulas which already have been ocr'd.
 
     Returns:
         list[npt.NDArray[np.float32]]: updated list of text bounding boxes.
@@ -247,9 +258,7 @@ def update_det_boxes(
         masks_list: list[Interval] = []
 
         for mf_box in mfd_detections:
-            mf_bbox = cast(
-                tuple[float, float, float, float], tuple(map(float, mf_box.bbox))
-            )
+            mf_bbox = cast(tuple[float, float, float, float], tuple(map(float, mf_box)))
             if __is_overlaps_y_exceeds_threshold(text_bbox, mf_bbox):
                 masks_list.append((mf_bbox[0], mf_bbox[2]))
 
@@ -432,10 +441,11 @@ class ModifiedPaddleOCR(PaddleOCR, OCRModel):
     def predict(
         self,
         image: Image.Image,
+        formula_bboxes: list[tuple[int, int, int, int]] | None = None,
+        ocr_drop_score: float = 0.6,
         cls: bool = True,
         bin: bool = False,
         inv: bool = False,
-        mfd_res: list[LayoutDetection] | None = None,
         alpha_color=(255, 255, 255),
         *args,
         **kwargs,
@@ -457,8 +467,8 @@ class ModifiedPaddleOCR(PaddleOCR, OCRModel):
         dt_boxes = sorted_boxes(dt_boxes)
         dt_boxes = merge_det_boxes(dt_boxes)
 
-        if mfd_res:
-            dt_boxes = update_det_boxes(dt_boxes, mfd_res)
+        if formula_bboxes:
+            dt_boxes = update_det_boxes(dt_boxes, formula_bboxes)
 
         img_crop_list = [
             (
@@ -475,7 +485,7 @@ class ModifiedPaddleOCR(PaddleOCR, OCRModel):
         results = []
         for box, rec_result in zip(dt_boxes, rec_res):
             text, score = rec_result
-            if score >= self.drop_score:
+            if score > ocr_drop_score:
                 results.append(
                     LayoutDetection(
                         cast(

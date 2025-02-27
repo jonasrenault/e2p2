@@ -12,7 +12,7 @@ from e2p2.pdf.rasterize import rasterize_pdf
 class LayoutElement(Enum):
     ABANDONED = -1
     UNKNOWN = 0
-    TEXT = 1
+    PLAIN_TEXT = 1
     TITLE = 2
     FIGURE = 3
     FIGURE_CAPTION = 4
@@ -22,6 +22,7 @@ class LayoutElement(Enum):
     FORMULA = 8
     FORMULA_INLINE = 9
     FORMULA_CAPTION = 10
+    TEXT = 11
 
     def __repr__(self) -> str:
         return self.name
@@ -164,3 +165,68 @@ class PdfDoc(Iterable):
         """
         for image_id, image in zip(self.page_ids, self.images):
             yield image_id, image
+
+
+def filter_formulas(layout_detections: list[LayoutDetection]) -> list[LayoutDetection]:
+    """
+    Filter layout detections returning elements that correspond to formulas.
+
+    Args:
+        layout_detections (list[LayoutDetection]): list of layout detections.
+
+    Returns:
+        list[LayoutDetection]: formula elements.
+    """
+    formulas = [
+        detection
+        for detection in layout_detections
+        if detection.category in (LayoutElement.FORMULA, LayoutElement.FORMULA_INLINE)
+    ]
+    return formulas
+
+
+def filter_ocr_elements(
+    layout_detections: list[LayoutDetection],
+) -> list[LayoutDetection]:
+    """
+    Filter layout detections, keeping only elements where text can be extracted (by OCR
+    or pdf parsing).
+
+    Args:
+        layout_detections (list[LayoutDetection]): list of layout detections.
+
+    Returns:
+        list[LayoutDetection]: elements for OCR.
+    """
+    ocrs = [
+        detection
+        for detection in layout_detections
+        if detection.category
+        in (
+            LayoutElement.ABANDONED,
+            LayoutElement.PLAIN_TEXT,
+            LayoutElement.TITLE,
+            LayoutElement.FIGURE_CAPTION,
+            LayoutElement.TABLE_CAPTION,
+            LayoutElement.TABLE_FOOTNOTE,
+        )
+    ]
+    return ocrs
+
+
+def filter_tables(layout_detections: list[LayoutDetection]) -> list[LayoutDetection]:
+    """
+    Filter layout detections, keeping only tables.
+
+    Args:
+        layout_detections (list[LayoutDetection]): list of layout detections.
+
+    Returns:
+        list[LayoutDetection]: list of tables.
+    """
+    tables = [
+        detection
+        for detection in layout_detections
+        if detection.category is LayoutElement.TABLE
+    ]
+    return tables

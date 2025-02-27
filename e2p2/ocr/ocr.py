@@ -11,5 +11,11 @@ class OCRModel(ABC):
     """
 
     @abstractmethod
-    def predict(self, image: Image.Image, *args, **kwargs) -> list[LayoutDetection]:
+    def predict(
+        self,
+        image: Image.Image,
+        formula_bboxes: list[tuple[int, int, int, int]] | None,
+        *args,
+        **kwargs,
+    ) -> list[LayoutDetection]:
         pass

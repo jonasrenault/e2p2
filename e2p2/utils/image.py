@@ -1,7 +1,64 @@
+from dataclasses import dataclass
+
 import cv2
 import numpy as np
 import numpy.typing as npt
 from PIL import Image
+
+from e2p2.pdf.pdf import LayoutDetection
+
+
+@dataclass
+class CropedImageInfo:
+    padding_x: int
+    padding_y: int
+    xmin: int
+    ymin: int
+    xmax: int
+    ymax: int
+    croped_width: int
+    croped_height: int
+
+
+def crop_image(
+    image: Image.Image,
+    layout_detection: LayoutDetection,
+    padding_x: int = 0,
+    padding_y: int = 0,
+) -> tuple[Image.Image, CropedImageInfo]:
+    """
+    Crop an Image to the bbox of a LayoutDetection, with optional padding on the x and y
+    axis (filled with white).
+
+    Args:
+        image (Image.Image): the input image.
+        layout_detection (LayoutDetection): the layout detection to crop to.
+        padding_x (int, optional): padding on the x axis. Defaults to 0.
+        padding_y (int, optional): padding on the y axis. Defaults to 0.
+
+    Returns:
+        tuple[Image.Image, CroppedImageInfo]: the cropped image and CropImageInfo.
+    """
+    crop_xmin, crop_ymin, crop_xmax, crop_ymax = layout_detection.bbox
+
+    # Create a white background with an additional width and height of 2 * padding
+    crop_new_width = crop_xmax - crop_xmin + padding_x * 2
+    crop_new_height = crop_ymax - crop_ymin + padding_y * 2
+    cropped_image = Image.new("RGB", (crop_new_width, crop_new_height), "white")
+    # and paste the cropped image into it
+    cropped_image.paste(image.crop(layout_detection.bbox), (padding_x, padding_y))
+
+    cropped_info = CropedImageInfo(
+        padding_x,
+        padding_y,
+        crop_xmin,
+        crop_ymin,
+        crop_xmax,
+        crop_ymax,
+        crop_new_width,
+        crop_new_height,
+    )
+    return cropped_image, cropped_info
 
 
 def get_average_color(image: Image.Image) -> tuple[int, ...]:

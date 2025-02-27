@@ -11,7 +11,13 @@ from e2p2.layout.yolo import LayoutDetectionYOLO
 from e2p2.mfd.yolo import FormulaDetectionYOLO
 from e2p2.ocr.ocr import OCRModel
 from e2p2.ocr.paddle import ModifiedPaddleOCR
-from e2p2.pdf.pdf import LayoutDetection, PdfDoc, filter_formulas, filter_ocr_elements
+from e2p2.pdf.pdf import (
+    LayoutDetection,
+    LayoutElement,
+    PdfDoc,
+    filter_formulas,
+    filter_ocr_elements,
+)
 from e2p2.utils.image import CropedImageInfo, bbox_to_points, crop_image, points_to_bbox
 from e2p2.utils.visualize import visualize_ocr
 
@@ -126,14 +132,33 @@ def ocr_pdf(
     visualize: bool = False,
     save_dir: Path | None = None,
 ):
+    """
+    Run OCR on the pdf's text elements. If no text elements were detected with
+    layout detection, run OCR on the whole page instead.
+
+    Args:
+        pdf (PdfDoc): input pdf.
+        ocr_model (OCRModel): the ocr model.
+        visualize (bool, optional): if True, visualize results in image saved on disk.
+            Defaults to False.
+        save_dir (Path | None, optional): output directory where results are saved.
+            Defaults to None.
+    """
     for page_number, image in pdf:
         formulas = filter_formulas(pdf.get_page_info(page_number).layout_detections)
         ocrs = filter_ocr_elements(pdf.get_page_info(page_number).layout_detections)
 
+        if len(ocrs) == 0:
+            ocrs = [
+                LayoutDetection(
+                    (0, 0, image.width, image.height), 1, LayoutElement.PLAIN_TEXT
+                )
+            ]
+
         ocr_results = []
         for ocr_element in ocrs:
             # Crop image to layout element
-            ocr_image, ocr_image_info = crop_image(image, ocr_element, 50, 50)
+            ocr_image, ocr_image_info = crop_image(image, ocr_element, 25, 25)
             # Get formula bounding boxes in the croped area
             formula_bboxes = get_adjusted_formula_bboxes(formulas, ocr_image_info)
             # OCR recognition
@@ -184,7 +209,7 @@ def ocr(
     device: Annotated[str, typer.Option(help="device to use for predictions")] = "cpu",
 ):
     """
-    Run formula recognition on given pdf file.
+    Run OCR on given pdf file.
 
     Args:
         input (Path): path to input pdf.
@@ -214,7 +239,7 @@ def ocr(
     layout_pdf(pdf, mfd_model, visualize, save_dir, img_size, conf, iou, task_name="MFD")
 
     # load OCR model
-    ocr_model = ModifiedPaddleOCR(lang="en")
+    ocr_model = ModifiedPaddleOCR(lang="fr")
 
     # run OCR: extract text in pdf
     ocr_pdf(pdf, ocr_model, visualize, save_dir)

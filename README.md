@@ -14,8 +14,20 @@
 - [PdfPlumber](https://github.com/jsvine/pdfplumber) Plumb a PDF for detailed information about each char, rectangle, line, et cetera — and easily extract text and tables.
 - [OCRmyPDF](https://github.com/ocrmypdf/OCRmyPDF) adds an OCR text layer to scanned PDF files, allowing them to be searched
 
+- [EasyOCR](https://github.com/JaidedAI/EasyOCR?tab=readme-ov-file)
 - [PDF Extract Kit](https://github.com/opendatalab/PDF-Extract-Kit?tab=readme-ov-file)
 - [MinerU](https://github.com/opendatalab/MinerU)
 - [DocLayout-YOLO](https://github.com/opendatalab/DocLayout-YOLO?tab=readme-ov-file)
 - [Pix2Text](https://github.com/breezedeus/Pix2Text/tree/main)
 - [UniMERNet](https://github.com/opendatalab/UniMERNet)
+
+
+## TODO
+
+- [] add language detection and use it for ocr
+- [] add option to ocr model to only detect text but not recognize
+- [] add table extraction model with rapid table
+- [] add reading order model
+- [] create postprocessing module to read through the detections and recreate the output in markdown
+- [] add OCR with EasyOCR
+- [] TESTS !

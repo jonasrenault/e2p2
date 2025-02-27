@@ -109,12 +109,13 @@ def visualize_ocr(
         if detection.content is None:
             continue
 
+        print(detection.content.text)
         poly = bbox_to_points(detection.bbox)
         _, color = LAYOUT_ELEMENT_TEXT_COLOR[detection.category]
 
         draw_left.polygon(poly, fill=color)  # type: ignore
         img_right_text = draw_box_txt_fine(w, h, detection.bbox, detection.content.text)
-        pts = poly.reshape((-1, 1, 2))
+        pts = poly.reshape((-1, 1, 2)).astype(np.int32)
         cv2.polylines(img_right_text, [pts], True, color, 1)
         img_right = cv2.bitwise_and(img_right, img_right_text)
 

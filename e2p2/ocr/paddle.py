@@ -34,13 +34,14 @@ def get_rotate_crop_image(
     img_crop_height = int(
         max(np.linalg.norm(points[0] - points[3]), np.linalg.norm(points[1] - points[2]))
     )
-    pts_std = np.float32(
+    pts_std = np.array(
         [
             [0, 0],
             [img_crop_width, 0],
             [img_crop_width, img_crop_height],
             [0, img_crop_height],
-        ]
+        ],
+        dtype=np.float32,
     )
     M = cv2.getPerspectiveTransform(points, pts_std)
     dst_img = cv2.warpPerspective(
@@ -70,11 +71,11 @@ def get_minarea_rect_crop(
         npt.NDArray: the croped image.
     """
     bounding_box = cv2.minAreaRect(np.array(points).astype(np.int32))
-    points = sorted(list(cv2.boxPoints(bounding_box)), key=lambda x: x[0])
+    _points = sorted(list(cv2.boxPoints(bounding_box)), key=lambda x: x[0])
 
-    index_a, index_d = (0, 1) if points[1][1] > points[0][1] else (1, 0)
-    index_b, index_c = (2, 3) if points[3][1] > points[2][1] else (3, 2)
-    box = [points[index_a], points[index_b], points[index_c], points[index_d]]
+    index_a, index_d = (0, 1) if _points[1][1] > _points[0][1] else (1, 0)
+    index_b, index_c = (2, 3) if _points[3][1] > _points[2][1] else (3, 2)
+    box = [_points[index_a], _points[index_b], _points[index_c], _points[index_d]]
     crop_img = get_rotate_crop_image(img, np.array(box))
     return crop_img
 

@@ -90,6 +90,9 @@ def visualize_ocr(
     where the original image is displayed on the left, and the results of OCR
     are displayed on the right.
 
+    Taken from https://github.com/PaddlePaddle/PaddleOCR/blob/
+    1d52a2b2e1d89bfc747a4bda0b85aab2e9771031/tools/infer/utility.py#L494
+
     Args:
         image (Image.Image): input Image.
         detections (list[LayoutDetection]): list of OCR results.
@@ -99,17 +102,17 @@ def visualize_ocr(
     """
     h, w = image.height, image.width
     img_left = image.copy()
-    img_right = np.ones((h, w, 3), dtype=np.uint8) * 255
+    img_right: cv2.typing.MatLike = np.ones((h, w, 3), dtype=np.uint8) * 255
     draw_left = ImageDraw.Draw(img_left)
 
     for detection in detections:
         if detection.content is None:
             continue
 
-        poly = bbox_to_points(detection.bbox).astype(np.int32)
+        poly = bbox_to_points(detection.bbox)
         _, color = LAYOUT_ELEMENT_TEXT_COLOR[detection.category]
 
-        draw_left.polygon(poly, fill=color)
+        draw_left.polygon(poly, fill=color)  # type: ignore
         img_right_text = draw_box_txt_fine(w, h, detection.bbox, detection.content.text)
         pts = poly.reshape((-1, 1, 2))
         cv2.polylines(img_right_text, [pts], True, color, 1)
@@ -151,18 +154,20 @@ def draw_box_txt_fine(
     if (length := font.getlength(text)) > text_dim[0]:
         font_size = int(font_size * text_dim[0] / length)
         font = ImageFont.load_default(font_size)
-    draw_text.text([0, 0], text, fill=(0, 0, 0), font=font)
+    draw_text.text((0.0, 0.0), text, fill=(0, 0, 0), font=font)
 
     if portrait:
-        img_text = img_text.transpose(Image.ROTATE_270)
+        img_text = img_text.transpose(Image.Transpose.ROTATE_270)
 
-    pts1 = np.float32([[0, 0], [box_width, 0], [box_width, box_height], [0, box_height]])
+    pts1 = np.array(
+        [[0, 0], [box_width, 0], [box_width, box_height], [0, box_height]],
+        dtype=np.float32,
+    )
     pts2 = bbox_to_points(bbox).astype(np.float32)
     M = cv2.getPerspectiveTransform(pts1, pts2)
 
-    img_text = np.array(img_text, dtype=np.uint8)
     img_right_text = cv2.warpPerspective(
-        img_text,
+        np.array(img_text, dtype=np.uint8),
         M,
         (img_width, img_height),
         flags=cv2.INTER_NEAREST,

@@ -61,63 +61,6 @@ def crop_image(
     return cropped_image, cropped_info
 
 
-def get_average_color(image: Image.Image) -> tuple[int, ...]:
-    # Convert image to numpy array
-    img_array = np.array(image)
-
-    # Get average color, ignoring fully transparent pixels
-    if img_array.shape[2] == 4:  # RGBA
-        alpha = img_array[:, :, 3]
-        rgb = img_array[:, :, :3]
-        mask = alpha > 0
-        if mask.any():
-            avg_color = rgb[mask].mean(axis=0)
-        else:
-            avg_color = rgb.mean(axis=(0, 1))
-    else:  # RGB
-        avg_color = img_array.mean(axis=(0, 1))
-    return tuple(map(int, avg_color))
-
-
-def get_contrasting_color(color: tuple[int, ...]) -> tuple[int, ...]:
-    return tuple(255 - c for c in color)
-
-
-def convert_transparent_to_contrasting(image: Image.Image) -> Image.Image:
-    """
-    Convert transparent pixels to a contrasting color.
-    Taken from https://github.com/breezedeus/Pix2Text/
-    blob/c87047b1732d55d1e2cce123b768cea52303db77/pix2text/utils.py#L176
-
-    Args:
-        image (Image.Image): input image with alpha channel.
-
-    Returns:
-        Image.Image: RGB image without alpha channel.
-    """
-    # Check if the image has an alpha channel
-    if image.mode in ("RGBA", "LA") or (
-        image.mode == "P" and "transparency" in image.info
-    ):
-        # Get average color of non-transparent pixels
-        avg_color = get_average_color(image)
-
-        # Get contrasting color for background
-        bg_color = get_contrasting_color(avg_color)
-
-        # Create a new background image with the contrasting color
-        background = Image.new("RGBA", image.size, bg_color)
-
-        # Paste the image on the background.
-        # If the image has an alpha channel, it will be used as a mask
-        background.paste(image, (0, 0), image)
-
-        # Convert to RGB (removes alpha channel)
-        return background.convert("RGB")
-
-    return image.convert("RGB")
-
-
 def binarize_img(img: npt.NDArray) -> npt.NDArray:
     """
     Binarize cv2 image to black and white.
@@ -164,3 +107,35 @@ def alpha_to_color(
 
         img = cv2.merge((B, G, R))
     return img
+
+
+def bbox_to_points(bbox: tuple[float, float, float, float]) -> npt.NDArray[np.float32]:
+    """
+    Change bounding box (xmin, ymin, xmax, ymax) to polygon (coordinates of 4 corners).
+
+    Args:
+        bbox (tuple[float, float, float, float]): xmin, ymin, xmax, ymax array
+
+    Returns:
+        npt.NDArray[np.float32]: array of corner coordinates
+    """
+    x0, y0, x1, y1 = bbox
+    return np.array([[x0, y0], [x1, y0], [x1, y1], [x0, y1]]).astype("float32")
+
+
+def points_to_bbox(points: npt.NDArray[np.float32]) -> tuple[float, float, float, float]:
+    """
+    Change polygon (array of corner coordinates) to bounding box
+    (xmin, ymin, xmax, ymax).
+
+    Args:
+        points (npt.NDArray[np.float32]): list of corner coordinates.
+
+    Returns:
+        tuple[float, float, float, float]: BBox
+    """
+
+    x0, y0 = points[0]
+    x1, _ = points[1]
+    _, y1 = points[2]
+    return (x0, y0, x1, y1)

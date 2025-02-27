@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Annotated, cast
 
+import cv2
 import numpy as np
 import numpy.typing as npt
 import typer
@@ -9,9 +10,10 @@ from e2p2.layout.task import layout_pdf
 from e2p2.layout.yolo import LayoutDetectionYOLO
 from e2p2.mfd.yolo import FormulaDetectionYOLO
 from e2p2.ocr.ocr import OCRModel
-from e2p2.ocr.paddle import ModifiedPaddleOCR, bbox_to_points, points_to_bbox
+from e2p2.ocr.paddle import ModifiedPaddleOCR
 from e2p2.pdf.pdf import LayoutDetection, PdfDoc, filter_formulas, filter_ocr_elements
-from e2p2.utils.image import CropedImageInfo, crop_image
+from e2p2.utils.image import CropedImageInfo, bbox_to_points, crop_image, points_to_bbox
+from e2p2.utils.visualize import visualize_ocr
 
 app = typer.Typer()
 
@@ -128,17 +130,26 @@ def ocr_pdf(
         formulas = filter_formulas(pdf.get_page_info(page_number).layout_detections)
         ocrs = filter_ocr_elements(pdf.get_page_info(page_number).layout_detections)
 
+        ocr_results = []
         for ocr_element in ocrs:
             # Crop image to layout element
             ocr_image, ocr_image_info = crop_image(image, ocr_element, 50, 50)
             # Get formula bounding boxes in the croped area
             formula_bboxes = get_adjusted_formula_bboxes(formulas, ocr_image_info)
             # OCR recognition
-            ocr_results = ocr_model.predict(ocr_image, formula_bboxes=formula_bboxes)
+            element_results = ocr_model.predict(ocr_image, formula_bboxes=formula_bboxes)
             # Convert results back to original coordinates
-            convert_ocr_results(ocr_results, ocr_image_info)
+            convert_ocr_results(element_results, ocr_image_info)
 
-            pdf.get_page_info(page_number).layout_detections.extend(ocr_results)
+            ocr_results.extend(element_results)
+
+        pdf.get_page_info(page_number).layout_detections.extend(ocr_results)
+
+        if visualize and save_dir is not None:
+            image = pdf.get_image(page_number)
+            vis_result = visualize_ocr(image, ocr_results)
+            ocr_file_name = f"{pdf.page_file_stem(page_number)}_OCR.png"
+            cv2.imwrite(str(save_dir / ocr_file_name), vis_result)
 
 
 @app.command()
@@ -203,7 +214,7 @@ def ocr(
     layout_pdf(pdf, mfd_model, visualize, save_dir, img_size, conf, iou, task_name="MFD")
 
     # load OCR model
-    ocr_model = ModifiedPaddleOCR()
+    ocr_model = ModifiedPaddleOCR(lang="en")
 
     # run OCR: extract text in pdf
     ocr_pdf(pdf, ocr_model, visualize, save_dir)

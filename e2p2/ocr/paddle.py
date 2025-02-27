@@ -8,7 +8,7 @@ from PIL import Image
 
 from e2p2.ocr.ocr import OCRModel
 from e2p2.pdf.pdf import ContentRecognition, LayoutDetection, LayoutElement
-from e2p2.utils.image import alpha_to_color, binarize_img
+from e2p2.utils.image import alpha_to_color, bbox_to_points, binarize_img, points_to_bbox
 
 type BBox = tuple[float, float, float, float]
 type Interval = tuple[float, float]
@@ -132,38 +132,6 @@ def __is_overlaps_y_exceeds_threshold(
     min_height = min(height1, height2)
 
     return (overlap / min_height) > overlap_ratio_threshold
-
-
-def bbox_to_points(bbox: BBox) -> npt.NDArray[np.float32]:
-    """
-    Change bounding box (xmin, ymin, xmax, ymax) to polygon (coordinates of 4 corners).
-
-    Args:
-        bbox (BBox): xmin, ymin, xmax, ymax array
-
-    Returns:
-        npt.NDArray[np.float32]: array of corner coordinates
-    """
-    x0, y0, x1, y1 = bbox
-    return np.array([[x0, y0], [x1, y0], [x1, y1], [x0, y1]]).astype("float32")
-
-
-def points_to_bbox(points: npt.NDArray[np.float32]) -> BBox:
-    """
-    Change polygon (array of corner coordinates) to bounding box
-    (xmin, ymin, xmax, ymax).
-
-    Args:
-        points (npt.NDArray[np.float32]): list of corner coordinates.
-
-    Returns:
-        list[float]: BBox
-    """
-
-    x0, y0 = points[0]
-    x1, _ = points[1]
-    _, y1 = points[2]
-    return (x0, y0, x1, y1)
 
 
 def merge_intervals(intervals: list[Interval]) -> list[Interval]:
@@ -450,26 +418,22 @@ class ModifiedPaddleOCR(PaddleOCR, OCRModel):
         *args,
         **kwargs,
     ) -> list[LayoutDetection]:
-        img = cv2.cvtColor(
-            np.array(image), cv2.COLOR_RGB2BGR
-        )  # Convert RGB to BGR for OpenCV
-
+        img = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
         img = preprocess_image(img, alpha_color, inv, bin)
-
         ori_img = img.copy()
 
-        # first run text detection to detect text boxes
+        # 1. run text detection to detect text boxes
         dt_boxes, _ = self.text_detector(img)
-
         if dt_boxes is None:
             return []
 
+        # 2. sort and merge detection boxes and remove formula bboxes.
         dt_boxes = sorted_boxes(dt_boxes)
         dt_boxes = merge_det_boxes(dt_boxes)
-
         if formula_bboxes:
             dt_boxes = update_det_boxes(dt_boxes, formula_bboxes)
 
+        # 3. get a croped image for each detection box
         img_crop_list = [
             (
                 get_rotate_crop_image(ori_img, dt_box)
@@ -481,6 +445,7 @@ class ModifiedPaddleOCR(PaddleOCR, OCRModel):
         if self.use_angle_cls and cls:
             img_crop_list, _ = self.text_classifier(img_crop_list)
 
+        # 4. apply text recognizer to image list and format results
         rec_res, _ = self.text_recognizer(img_crop_list)
         results = []
         for box, rec_result in zip(dt_boxes, rec_res):

@@ -1,3 +1,5 @@
+from typing import Literal
+
 import numpy as np
 from PIL import Image
 from rapid_table import RapidTable, RapidTableInput
@@ -25,7 +27,14 @@ class RapidTableModel(TableModel):
     def predict(
         self,
         image: Image.Image,
+        format: Literal["html", "latex", "markdown"] = "html",
     ) -> ContentRecognition:
+        if format != "html":
+            raise ValueError(
+                f"Output format {format} is not supported. "
+                "RapidTable can only predict html."
+            )
+
         ocr_results = self.ocr_model.predict(image)
         ocr_results_for_table = []
         for ocr_result in ocr_results:
@@ -37,7 +46,7 @@ class RapidTableModel(TableModel):
                 [poly, ocr_result.content.text, ocr_result.content.score]
             )
 
-        table_results = self.model(np.asarray(image), ocr_result)
+        table_results = self.model(np.asarray(image), ocr_results_for_table)
 
         return ContentRecognition(
             text=table_results.pred_html,

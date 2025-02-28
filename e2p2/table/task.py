@@ -23,11 +23,20 @@ def table_pdf(
     for page_number, image in pdf:
         tables = filter_tables(pdf.get_page_info(page_number).layout_detections)
 
-        for table in tables:
+        for idx, table in enumerate(tables):
             # Crop image to layout element
             table_image, _ = crop_image(image, table)
+            # Extract table
             table_content = table_model.predict(table_image)
             table.content = table_content
+
+            if visualize and save_dir is not None:
+                html_content = table_content.text
+                if not html_content.strip().endswith("</html>"):
+                    html_content = f"<html><body>{html_content}</body></html>"
+                table_file_name = f"{pdf.page_file_stem(page_number)}_Table_{idx}.html"
+                with open(save_dir / table_file_name, "w") as f:
+                    f.write(html_content)
 
 
 @app.command()

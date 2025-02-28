@@ -625,6 +625,7 @@ dependencies = [
     { name = "pypdfium2" },
     { name = "rapid-table" },
     { name = "rapidocr-onnxruntime" },
+    { name = "struct-eqtable" },
     { name = "tqdm" },
     { name = "typer" },
     { name = "ultralytics" },
@@ -654,6 +655,7 @@ requires-dist = [
     { name = "pypdfium2", specifier = ">=4.30.1" },
     { name = "rapid-table", specifier = ">=1.0.3" },
     { name = "rapidocr-onnxruntime", specifier = ">=1.4.4" },
+    { name = "struct-eqtable", specifier = ">=0.3.3" },
     { name = "tqdm", specifier = ">=4.67.1" },
     { name = "typer", specifier = ">=0.15.1" },
     { name = "ultralytics", specifier = ">=8.3.23" },
@@ -3132,6 +3134,19 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/c7/92/a845f3fc63e1603205962e79d87c0644ec035937bf3eb2590fdab358dba2/stringzilla-3.11.3-cp313-cp313-win32.whl", hash = "sha256:cbb28cdfc23e7434cb24dc4ef4599ccb38603c15fd60a7c9472db38925de2699", size = 68766 },
     { url = "https://files.pythonhosted.org/packages/a9/17/f73a0e90c96a90ac4075af5ab48052dc9363632dba3cba8162a908fbc0e8/stringzilla-3.11.3-cp313-cp313-win_amd64.whl", hash = "sha256:9849e2f0d1e58670bd19342c85da69c4cf23ef69c138c928f3e6fb941314a9d2", size = 80032 },
     { url = "https://files.pythonhosted.org/packages/33/ec/1eaefaace793c63c84ca77d9855d7a1d89a45014a4da6e6284bef1762f10/stringzilla-3.11.3-cp313-cp313-win_arm64.whl", hash = "sha256:2747ce2a37c7a0a4d113fa6810efcb53d5d638fdf02b86e508e8bf938821a73c", size = 69682 },
+]
+
+[[package]]
+name = "struct-eqtable"
+version = "0.3.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "torch" },
+    { name = "transformers" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/47/87/12ee5044432a3d832f337131192b0605d308dde4bd5baa24c912e3eac035/struct_eqtable-0.3.3.tar.gz", hash = "sha256:9564ea5ecb5aaf2cfc3eb55268f17a95f8e3243aa39e0a7b15ce7bdaa370bc8a", size = 26363 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ac/70/240d7d010ca1e714170134cc4fda3124fc869e9b6c3b3401672a0ff29edf/struct_eqtable-0.3.3-py3-none-any.whl", hash = "sha256:262eb3439cd5afdc523dccb7d7a1959a79fb1b9983296ce513a4da81a2b4d530", size = 26161 },
 ]
 
 [[package]]

@@ -109,7 +109,6 @@ def visualize_ocr(
         if detection.content is None:
             continue
 
-        print(detection.content.text)
         poly = bbox_to_points(detection.bbox)
         _, color = LAYOUT_ELEMENT_TEXT_COLOR[detection.category]
 

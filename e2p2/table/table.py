@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Literal
 
 from PIL import Image
 
@@ -11,5 +12,11 @@ class TableModel(ABC):
     """
 
     @abstractmethod
-    def predict(self, image: Image.Image, *args, **kwargs) -> ContentRecognition:
+    def predict(
+        self,
+        image: Image.Image,
+        format: Literal["html", "latex", "markdown"] = "html",
+        *args,
+        **kwargs,
+    ) -> ContentRecognition:
         pass

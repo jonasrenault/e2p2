@@ -14,7 +14,7 @@ class OCRModel(ABC):
     def predict(
         self,
         image: Image.Image,
-        formula_bboxes: list[tuple[int, int, int, int]] | None,
+        formula_bboxes: list[tuple[int, int, int, int]] | None = None,
         *args,
         **kwargs,
     ) -> list[LayoutDetection]:

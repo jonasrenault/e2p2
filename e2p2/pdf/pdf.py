@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Iterable, Iterator
 
 import numpy as np
+import numpy.typing as npt
 from PIL import Image
 
 from e2p2.pdf.rasterize import rasterize_pdf
@@ -35,6 +36,8 @@ class LayoutElement(Enum):
 class ContentRecognition:
     text: str
     score: float
+    cell_bboxes: npt.NDArray | None = None
+    logic_points: npt.NDArray | None = None
 
 
 @dataclass

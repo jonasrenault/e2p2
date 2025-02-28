@@ -24,10 +24,10 @@
 
 ## TODO
 
-- [] add language detection and use it for ocr
-- [] add option to ocr model to only detect text but not recognize
-- [] add table extraction model with rapid table
-- [] add reading order model
-- [] create postprocessing module to read through the detections and recreate the output in markdown
-- [] add OCR with EasyOCR
-- [] TESTS !
+- [ ] add language detection and use it for ocr
+- [ ] add option to ocr model to only detect text but not recognize
+- [ ] add table extraction model with rapid table
+- [ ] add reading order model
+- [ ] create postprocessing module to read through the detections and recreate the output in markdown
+- [ ] add OCR with EasyOCR
+- [ ] TESTS !
